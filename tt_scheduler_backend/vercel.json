@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "tt-scheduler_backend/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "vercel_app/wsgi.py"
+    }
+  ]
+}
