@@ -53,8 +53,8 @@ required_classes = 0
 available_classes = {}
 curr_state = []
 
-min_time = 11
-max_time = 17.5
+min_time = 8
+max_time = 20
 
 
 def get_required_classes():
@@ -68,14 +68,22 @@ def get_required_classes():
     return count
 
 
-def is_valid_timing(c, temp_c):
+def within_limits(c):
+    """
+    Checks if the class is within the time limits.
+    """
+    return c.get_start_time() >= min_time and c.get_end_time() <= max_time
+
+
+def does_not_overlap(c, temp_c):
     """
     Checks if the timings of the new class and the current class overlap.
     """
-    within_limits = c.get_start_time() >= min_time and c.get_end_time() <= max_time
+
     starts_later = c.get_start_time() >= temp_c.get_end_time()
     ends_before = c.get_end_time() <= temp_c.get_start_time()
-    if within_limits and (starts_later or ends_before):
+
+    if (starts_later or ends_before):
         return True
     return False
 
@@ -113,12 +121,13 @@ def get_next_valid_classes():
 
     try:
         for c in classes:
-            valid_classes.append(c)
-            for temp_c in curr_state:
-                # if the days and timings of the new class and the current class overlap, remove the new class from the list of valid classes
-                if len(set(c.days + temp_c.days)) != len(c.days + temp_c.days) and not is_valid_timing(c, temp_c):
-                    valid_classes.pop()
-                    break
+            if within_limits(c):
+                valid_classes.append(c)
+                for temp_c in curr_state:
+                    # if the days and timings of the new class and the current class overlap, remove the new class from the list of valid classes
+                    if len(set(c.days + temp_c.days)) != len(c.days + temp_c.days) and not does_not_overlap(c, temp_c):
+                        valid_classes.pop()
+                        break
     except TypeError:
         pass
 
@@ -178,15 +187,19 @@ def merge_with_available_classes(classes):
             available_classes[name][curr_lec][c.class_type].append(c)
 
 
-def find_schedule(courses):
-    global required_classes, available_classes, curr_state
+def find_schedule(course_names, term, min_start_time, max_end_time):
+    from .Class import get_time
+    global required_classes, available_classes, curr_state, min_time, max_time
+
     required_classes = 0
     available_classes = {}
     curr_state = []
+    min_time = get_time(min_start_time) if min_start_time else min_time
+    max_time = get_time(max_end_time) if max_end_time else max_time
 
-    for course in courses:
-        name, section = course.split(" ")
-        merge_with_available_classes(scrape_course(name, section, 1))
+    for course_name in course_names:
+        name, section = course_name.split(" ")
+        merge_with_available_classes(scrape_course(name, section, term))
 
     required_classes = get_required_classes()
 

@@ -6,6 +6,9 @@ import React, { useState } from 'react';
 function App() {
   const [courseNames, setCourseNames] = useState([]);
   const [results, setResults] = useState([]);
+  const [term, setTerm] = useState('1');
+  const [minStartTime, setMinStartTime] = useState('');
+  const [maxEndTime, setMaxEndTime] = useState('');
 
   const handleAddCourse = () => {
     setCourseNames([...courseNames, '']);
@@ -24,7 +27,14 @@ function App() {
   };
 
   const handleFetchResults = () => {
-    axios.post('http://127.0.0.1:8000/api/courses/', { search_params: courseNames })
+    let criteria = {
+      courseNames: courseNames,
+      term: term,
+      minStartTime: minStartTime,
+      maxEndTime: maxEndTime
+    }
+
+    axios.post('http://127.0.0.1:8000/api/courses/', { search_params: criteria })
       .then(response => {
           setResults(response.data);
       })
@@ -59,6 +69,37 @@ function App() {
           <button className="add-course-button" onClick={handleAddCourse}>
             Add Course
           </button>
+          <div className="term-input">
+            <label htmlFor="termSelect">Select Term:</label>
+            <select
+              id="termSelect"
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+            >
+              <option value="1">Term 1</option>
+              <option value="2">Term 2</option>
+            </select>
+          </div>
+          <div className="time-inputs">
+            <div>
+              <label>Minimum Start Time:</label>
+              <input
+                type="time"
+                id="minStartTime"
+                value={minStartTime}
+                onChange={(e) => setMinStartTime(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Maximum End Time:</label>
+              <input
+                type="time"
+                id="maxEndTime"
+                value={maxEndTime}
+                onChange={(e) => setMaxEndTime(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
         <button className="fetch-button" onClick={handleFetchResults}>
           Fetch Results
