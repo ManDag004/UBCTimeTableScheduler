@@ -15,7 +15,7 @@ days_index = 6
 start_time_index = 7
 end_time_index = 8
 
-
+#gets the classes (including labs, tutorials etc) for a course
 def scrape_course(dept, num, required_term):
     url = f"https://courses.students.ubc.ca/cs/courseschedule?pname=subjarea&tname=subj-course&dept={dept}&course={num}"
     result = requests.get(url, headers=ua)

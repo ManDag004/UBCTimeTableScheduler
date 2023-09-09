@@ -2,6 +2,9 @@ from .Professor import Professor
 
 
 def get_time(time):
+    """
+    Converts the time from 24 hour format to decimal format.
+    """
     hrs, mins = time.split(":")
     hrs = int(hrs)
     mins = 0 if mins == "00" else 0.5
@@ -9,6 +12,9 @@ def get_time(time):
 
 
 class Class:
+    """
+    represents a class at UBC
+    """
     def __init__(self, name, start_time, end_time, days, class_type="Lecture", professor=None):
         self.name = name
         self.start_time = start_time

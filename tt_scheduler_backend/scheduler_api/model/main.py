@@ -53,9 +53,14 @@ required_classes = 0
 available_classes = {}
 curr_state = []
 
+min_time = 11
+max_time = 17.5
 
-# Total number of classes: Lectures + Any type of small classes (labs, tutorials etc)
+
 def get_required_classes():
+    """
+    Total number of classes: Lectures + Any type of small classes (labs, tutorials etc)
+    """
     count = 0
     for t in available_classes:
         count += len(list(available_classes[t].values())[0]) + 1
@@ -64,18 +69,28 @@ def get_required_classes():
 
 
 def is_valid_timing(c, temp_c):
-    a = c.get_start_time() >= temp_c.get_end_time()
-    b = c.get_end_time() <= temp_c.get_start_time()
-    if a or b:
+    """
+    Checks if the timings of the new class and the current class overlap.
+    """
+    within_limits = c.get_start_time() >= min_time and c.get_end_time() <= max_time
+    starts_later = c.get_start_time() >= temp_c.get_end_time()
+    ends_before = c.get_end_time() <= temp_c.get_start_time()
+    if within_limits and (starts_later or ends_before):
         return True
     return False
 
 
 def get_next_classes():
+    """
+    Gets the next classes by checking if the number of classes in the current state
+    """
     if len(available_classes) > len(curr_state):
+        # get the next lecture classes
         classes = list(available_classes[list(available_classes.keys())[len(curr_state)]].keys())
+        # sort the lecture sections by the professor rating
         return sorted(classes, key=lambda x: x.professor.rating if x.professor is not None else float("-inf"), reverse=True)
     else:
+        # get the next class based on how many classes have been added
         count = len(available_classes)
         main_count = 0
         for t in available_classes:
@@ -89,6 +104,10 @@ def get_next_classes():
 
 
 def get_next_valid_classes():
+    """
+    Gets the next valid classes by checking if the days and timings of the new classes do not
+    overlap with those of classes in the current state.
+    """
     classes = get_next_classes()
     valid_classes = []
 
@@ -96,6 +115,7 @@ def get_next_valid_classes():
         for c in classes:
             valid_classes.append(c)
             for temp_c in curr_state:
+                # if the days and timings of the new class and the current class overlap, remove the new class from the list of valid classes
                 if len(set(c.days + temp_c.days)) != len(c.days + temp_c.days) and not is_valid_timing(c, temp_c):
                     valid_classes.pop()
                     break
@@ -106,10 +126,18 @@ def get_next_valid_classes():
 
 
 def is_valid_combination():
+    """
+    Checks if the current state is valid by checking if the number of classes in the current 
+    state is equal to the required number of classes.
+    """
     return len(curr_state) == required_classes
 
 
 def solve():
+    """
+    Solves the problem recursively by adding the next valid class to the current state and 
+    checking if the current state is valid.
+    """
     if is_valid_combination():
         return True
 
@@ -122,14 +150,20 @@ def solve():
 
 
 def merge_with_available_classes(classes):
-    temp_name = classes[0].name.split(" ")
-    name = temp_name[0] + " " + temp_name[1]
+    """
+    merges the classes with all of the already existing classes. 
+    """
+    temp_name = classes[0].name.split(" ") # getting the course name from the first class
+    name = temp_name[0] + " " + temp_name[1] # removing the section number from the course name
     curr_lec = None
 
     for c in classes:
+
+        # if the course name is not in the dictionary, create its corresponding dictionary
         if available_classes.get(name) is None:
             available_classes[name] = {}
 
+        # if the class is a lecture, set the current lecture to the class and create a dictionary for it as the other classes will come under it 
         if c.class_type == "Lecture":
             curr_lec = c
             available_classes[name][c] = {}
@@ -139,6 +173,7 @@ def merge_with_available_classes(classes):
         elif available_classes[name][curr_lec].get(c.class_type) is None:
             available_classes[name][curr_lec][c.class_type] = []
 
+        # add the class to the dictionary of its type in its lecture class
         if c.class_type != "Lecture":
             available_classes[name][curr_lec][c.class_type].append(c)
 
