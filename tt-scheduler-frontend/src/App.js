@@ -34,7 +34,7 @@ function App() {
       maxEndTime: maxEndTime
     }
 
-    axios.post('ManDag004.pythonanywhere.com/api/courses/', { search_params: criteria })
+    axios.post('http://ManDag004.pythonanywhere.com/api/courses/', { search_params: criteria })
       .then(response => {
           setResults(response.data);
       })
