@@ -24,7 +24,10 @@ class Class:
         self.professor = professor
 
     def get_start_time(self):
-        return get_time(self.start_time)
+        try:
+            return get_time(self.start_time)
+        except:
+            return 0
 
     def get_end_time(self):
         return get_time(self.end_time)

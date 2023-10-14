@@ -2,6 +2,9 @@ import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
 import React, { useState } from 'react';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import moment from 'moment';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 function App() {
   const [courseNames, setCourseNames] = useState([]);
@@ -9,6 +12,51 @@ function App() {
   const [term, setTerm] = useState('1');
   const [minStartTime, setMinStartTime] = useState('');
   const [maxEndTime, setMaxEndTime] = useState('');
+  const localizer = momentLocalizer(moment);
+  const [events, setEvents] = useState([]);
+
+  const populateEvents = () => {
+    let events = [];
+    for (let i = 0; i < results.length; i++) {
+      let course = results[i];
+      console.log(course);
+      let title = course["title"];
+      let days = course["days"];
+      let start_time = course["start_time"];
+      let end_time = course["end_time"];
+      console.log("days", days);
+      
+      days.map((day) => {
+        console.log(day);
+        let event = {
+          title: title,
+          start: new Date(2023, 9, getDayOfWeek(day), parseInt(start_time.split(":")[0]), parseInt(start_time.split(":")[1])),
+          end: new Date(2023, 9, getDayOfWeek(day), parseInt(end_time.split(":")[0]), parseInt(end_time.split(":")[1])),
+        }
+        events.push(event);
+      });
+
+    }
+    setEvents(events);
+  }
+
+  const getDayOfWeek = (day) => {
+    console.log(day);
+    switch (day) {
+      case "Mon":
+        return 2;
+      case "Tue":
+        return 3;
+      case "Wed":
+        return 4;
+      case "Thu":
+        return 5;
+      case "Fri":
+        return 6;
+      default:
+        return 0;
+    }
+  }
 
   const handleAddCourse = () => {
     setCourseNames([...courseNames, '']);
@@ -34,9 +82,10 @@ function App() {
       maxEndTime: maxEndTime
     }
 
-    axios.post('https://ManDag004.pythonanywhere.com/api/courses/', { search_params: criteria })
+    axios.post('http://127.0.0.1:8000/api/courses/', { search_params: criteria })
       .then(response => {
           setResults(response.data);
+          populateEvents();
       })
       .catch(error => {
           console.error('Error fetching courses:', error);
@@ -104,15 +153,25 @@ function App() {
         <button className="fetch-button" onClick={handleFetchResults}>
           Fetch Results
         </button>
-        <div className="results">
+        {/* <div className="results">
           <h2 className="results-title">Course Results</h2>
           <ul className="results-list">
             {results.map((result, index) => (
               <li key={index}>{result}</li>
             ))}
           </ul>
-        </div>
+        </div> */}
       </main>
+      {/* default view of week*/}
+      
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 500 }}
+        defaultView='week'
+      />
     </div>
   );
 }

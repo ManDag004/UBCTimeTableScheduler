@@ -200,12 +200,12 @@ def find_schedule(course_names, term, min_start_time, max_end_time):
     for course_name in course_names:
         name, section = course_name.split(" ")
         merge_with_available_classes(scrape_course(name, section, term))
-
+    
     required_classes = get_required_classes()
 
     if solve():
         print([c.name for c in curr_state])
-        return [c.name for c in curr_state]
+        return [{"title": c.name, "start_time": c.start_time, "end_time": c.end_time, "days": c.days} for c in curr_state]
     else:
         return ["No Combination"]
     
