@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -14,6 +14,10 @@ function App() {
   const [maxEndTime, setMaxEndTime] = useState('');
   const localizer = momentLocalizer(moment);
   const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    populateEvents();
+  }, [results]);
 
   const populateEvents = () => {
     let events = [];
@@ -85,7 +89,6 @@ function App() {
     axios.post('http://127.0.0.1:8000/api/courses/', { search_params: criteria })
       .then(response => {
           setResults(response.data);
-          populateEvents();
       })
       .catch(error => {
           console.error('Error fetching courses:', error);
@@ -169,8 +172,10 @@ function App() {
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 500 }}
+        style={{ height: 750 }}
         defaultView='week'
+        defaultDate={new Date(2023, 9, 1)}
+        toolbar={false}
       />
     </div>
   );
